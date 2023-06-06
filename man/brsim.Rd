@@ -10,6 +10,7 @@ brsim(
   clust = FALSE,
   part = NULL,
   aggl.meth = "ward.D2",
+  sort.map = FALSE,
   oneplot = TRUE,
   cex.dndr.lab = 0.7,
   cex.sil.lab = 0.7,
@@ -25,7 +26,11 @@ brsim(
 
 \item{part}{Desired number of clusters; if NULL (default), an optimal partition is calculated (see Details).}
 
-\item{aggl.meth}{Agglomeration method ("ward.D2" by default).}
+\item{aggl.meth}{Agglomeration method ("ward.D2" by default) to be used; the selected method is internally used for the reordering
+of the heatmap if \code{order.map} is set to \code{TRUE}; for other methods see \code{\link[stats]{hclust}}.}
+
+\item{sort.map}{TRUE or FALSE (default) if the user does or does not want the rendered heatmap to be ordered on the basis of
+the selected hierachical clustering.}
 
 \item{oneplot}{TRUE (default) or FALSE if the user wants or does not want the plots to be visualized in a single window.}
 
@@ -48,12 +53,15 @@ The function returns a list storing the following components \itemize{
 }
 }
 \description{
-This function calculates the Brainerd-Robinson (BR) similarity coefficient for each pair of row of the input table.
-It also performs a permutation test to assess the significance of each BR coefficient, and allows to carry
+This function calculates the Brainerd-Robinson (BR) similarity coefficient for each pair of row
+of the input table (Robinson-Brainerd 1951, 1952).
+It also performs a permutation test to assess the significance of each BR coefficient (DeBoer-Kintigh-Rostoker 1996), and allows to carry
 out a hierarchical agglomerative clustering. An optimal cluster solution can be established using the silhouette method
 (see details provided below). The function produces a correlation matrix in tabular form, which is also visually plotted as an heatmap.
-In the heat-map (which is built using the \code{corrplot}), the size and the color of the
-squares are proportional to the Brainerd-Robinson coefficients.\cr
+In the heatmap (which is built using the \code{corrplot} package), the size and the color of the
+squares are proportional to the Brainerd-Robinson coefficients. Optionally, the heatmap can be reordered on the basis
+of the hierachical clustering, with clusters enclosed by red rectangles.\cr
+Visit this \href{https://drive.google.com/file/d/1LSC5VE_QZNM2KOCPkItn--1zsjfXnHbH/view?usp=share_link}{LINK} to access the package's vignette.\cr
 }
 \details{
 \strong{Permutation-based p-values}\cr
@@ -63,11 +71,11 @@ the function first calculates the observed Brainerd-Robinson (BR) coefficient. T
 between the two assemblages. The function then performs a certain number of permutations (default is 1000).
 In each permutation, it generates two new assemblages (each featuring a sample size corresponding to the size of
 each assemblage being compared) by randomly sampling from the global pool (the combined data of all assemblages),
-and calculates the BR coefficient for this new pair of assemblages. This creates a distribution of BR coefficients
-that we would expect to see by chance. The p-value is then calculated as the proportion of the permuted BR coefficients
-that are less than or equal to the observed BR coefficient. A small p-value (typically < 0.05) suggests that the
-observed similarity between the two assemblages is statistically significant; it is unlikely to have occurred
-just by chance.\cr
+and calculates the BR coefficient for this new pair of assemblages (see DeBoer-Kintigh-Rostoker 1996). This creates
+a distribution of BR coefficients that we would expect to see by chance. The p-value is then calculated as the
+proportion of the permuted BR coefficients that are less than or equal to the observed BR coefficient. A small
+p-value (typically < 0.05) suggests that the observed similarity between the two assemblages is statistically
+significant; it is unlikely to have occurred just by chance.\cr
 
 In simple terms, the p-value calculation is trying to answer the question: if there were no real
 similarity between these two assemblages, what is the probability that I would observe a similarity as extreme as
@@ -84,26 +92,32 @@ is internally calculated as the maximum value of the BR coefficient (200) minus 
 This allows a simpler reading of the dendrogram which is produced by the function, where the less dissimilar
 (i.e., more similar) units will be placed at lower levels, while more dissimilar (i.e., less similar) units
 will be placed at higher levels within the dendrogram. The latter depicts the hierarchical clustering based
-(by default) on the Ward's agglomeration method; rectangles identify the selected cluster partition.\cr
+(by default) on the Ward's agglomeration method; rectangles identify the selected cluster partition. Optionally,
+by setting the \code{sort.map} to \code{TRUE}, the heatmap can be reordered on the basis of the hierarchical clustering,
+with clusters indicated by red rectangles. The number of clusters indicated depends on what requested by the user (see
+the next section). Note that, internally, the reordering is based on the same agglomeration method
+selected by the user via the \code{aggl.method} parameter, which is set to \code{ward.D2} by default.\cr
 
 \strong{Number of clusters and silhouette method}\cr
 
 Besides the dendrogram, a silhouette plot is produced, which allows to measure how 'good' is the selected cluster solution.
 If the parameter \code{part} is left empty (default), an optimal cluster solution is
 obtained. The optimal partition is selected via an iterative procedure which identifies at which
-cluster solution the highest average silhouette width is achieved. If a user-defined partition is
-needed, the user can input the desired number of clusters using the parameter \code{part}. In either
-case, an additional plot is returned besides the cluster dendrogram and the silhouette plot; it
+cluster solution the highest average silhouette width is achieved. The cluster solution ranges from a minimum of
+2 to a maximum which is equal to the number of units (i.e., the rows of the input dataset) minus 1.
+The number of units essentially represents the maximum number of clusters that could potentially be formed
+if each row were its own cluster. However, since a cluster solution requires at least two groups,
+the maximum number of meaningful clusters is one less than the number of rows.
+If a user-defined partition is needed, the user can input the desired number of clusters using the parameter \code{part}.
+In either case, an additional plot is returned besides the cluster dendrogram and the silhouette plot; it
 displays a scatterplot in which the cluster solution (x-axis) is plotted against the average
 silhouette width (y-axis). A black dot represents the partition selected either by the iterative
 procedure or by the user. Note that in the silhouette plot, the labels on the left-hand side of the
 chart show the units' names and the cluster number to which each unit is closer.\cr
 
 The silhouette plot is obtained from the \code{silhouette()} function out from the \code{cluster} package.
-For a detailed description of the silhouette plot, its rationale, and its interpretation, see:\cr
-Rousseeuw P J. 1987. "Silhouettes: A graphical aid to the interpretation and validation of cluster
-analysis", Journal of Computational and Applied Mathematics 20, 53-65
-(http://www.sciencedirect.com/science/article/pii/0377042787901257).\cr
+For a detailed description of the silhouette plot, its rationale, and its interpretation, see
+Rousseeuw 1987.
 
 \strong{Descriptive by-cluster dotplots}\cr
 
@@ -133,6 +147,24 @@ result <- brsim(mytable, clust=TRUE)
 
 result <- brsim(mytable, clust=TRUE, part=3)
 
+# same as above, but rendering with a reordered heatmap
+
+result <- brsim(mytable, clust=TRUE, part=3, sort.map=TRUE)
+
+
+}
+\references{
+Robinson, W. S. (1951). A Method for Chronologically Ordering Archaeological Deposits.
+In American Antiquity (Vol. 16, Issue 4, pp. 293–301). Cambridge University Press.
+
+Robinson, W. S., & Brainerd, G. W. (1952). Robinson’s Coefficient of Agreement – A Rejoinder.
+In American Antiquity (Vol. 18, Issue 1, pp. 60–61). Cambridge University Press.
+
+Rousseeuw P J. (1987). Silhouettes: A graphical aid to the interpretation and validation of cluster
+analysis. In Journal of Computational and Applied Mathematics 20, 53-65.
+
+DeBoer, W. R., Kintigh, K., & Rostoker, A. G. (1996). Ceramic Seriation and Site Reoccupation in Lowland South America.
+In Latin American Antiquity (Vol. 7, Issue 3, pp. 263–278). Cambridge University Press.
 }
 \seealso{
 \code{\link[corrplot]{corrplot}} , \code{\link[cluster]{silhouette}}
