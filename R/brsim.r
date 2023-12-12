@@ -14,14 +14,17 @@
 #'
 #' The rationale behind the p-value calculation is as follows: for each pair of assemblages in the input data,
 #' the function first calculates the observed Brainerd-Robinson (BR) coefficient. This is a measure of the similarity
-#' between the two assemblages. The function then performs a certain number of permutations (default is 1000).
+#' between the two assemblages.
+#'
+#' The function then performs a certain number of permutations (default is 1000).
 #' In each permutation, it generates two new assemblages (each featuring a sample size corresponding to the size of
 #' each assemblage being compared) by randomly sampling from the global pool (the combined data of all assemblages),
 #' and calculates the BR coefficient for this new pair of assemblages (see DeBoer-Kintigh-Rostoker 1996). This creates
-#' a distribution of BR coefficients that we would expect to see by chance. The p-value is then calculated as the
-#' proportion of the permuted BR coefficients that are less than or equal to the observed BR coefficient. A small
-#' p-value (typically < 0.05) suggests that the observed similarity between the two assemblages is statistically
-#' significant; it is unlikely to have occurred just by chance.\cr
+#' a distribution of BR coefficients that we would expect to see by chance.
+#'
+#' The p-value is then calculated as the proportion of the permuted BR coefficients that are less than or equal
+#' to the observed BR coefficient. A small p-value (typically < 0.05) suggests that the observed similarity
+#' between the two assemblages is statistically significant; it is unlikely to have occurred just by chance.\cr
 #'
 #' In simple terms, the p-value calculation is trying to answer the question: if there were no real
 #' similarity between these two assemblages, what is the probability that I would observe a similarity as extreme as
@@ -35,11 +38,13 @@
 #' By setting the parameter \code{clust} to \code{TRUE}, the units (rows) for which the BR coefficients have been
 #' calculated will be clustered. Note that the clustering is based on a dissimilarity matrix which
 #' is internally calculated as the maximum value of the BR coefficient (200) minus the observed BR coefficient.
+#'
 #' This allows a simpler reading of the dendrogram which is produced by the function, where the less dissimilar
 #' (i.e., more similar) units will be placed at lower levels, while more dissimilar (i.e., less similar) units
 #' will be placed at higher levels within the dendrogram. The latter depicts the hierarchical clustering based
-#' (by default) on the Ward's agglomeration method; rectangles identify the selected cluster partition. Optionally,
-#' by setting the \code{sort.map} to \code{TRUE}, the heatmap can be reordered on the basis of the hierarchical clustering,
+#' (by default) on the Ward's agglomeration method; rectangles identify the selected cluster partition.
+#'
+#' Optionally, by setting the \code{sort.map} to \code{TRUE}, the heatmap can be reordered on the basis of the hierarchical clustering,
 #' with clusters indicated by red rectangles. The number of clusters indicated depends on what requested by the user (see
 #' the next section). Note that, internally, the reordering is based on the same agglomeration method
 #' selected by the user via the \code{aggl.method} parameter, which is set to \code{ward.D2} by default.\cr
@@ -48,17 +53,23 @@
 #'
 #' Besides the dendrogram, a silhouette plot is produced, which allows to measure how 'good' is the selected cluster solution.
 #' If the parameter \code{part} is left empty (default), an optimal cluster solution is
-#' obtained. The optimal partition is selected via an iterative procedure which identifies at which
+#' obtained.
+#'
+#' The optimal partition is selected via an iterative procedure which identifies at which
 #' cluster solution the highest average silhouette width is achieved. The cluster solution ranges from a minimum of
 #' 2 to a maximum which is equal to the number of units (i.e., the rows of the input dataset) minus 1.
 #' The number of units essentially represents the maximum number of clusters that could potentially be formed
 #' if each row were its own cluster. However, since a cluster solution requires at least two groups,
 #' the maximum number of meaningful clusters is one less than the number of rows.
+#'
 #' If a user-defined partition is needed, the user can input the desired number of clusters using the parameter \code{part}.
+#'
 #' In either case, an additional plot is returned besides the cluster dendrogram and the silhouette plot; it
 #' displays a scatterplot in which the cluster solution (x-axis) is plotted against the average
 #' silhouette width (y-axis). A black dot represents the partition selected either by the iterative
-#' procedure or by the user. Note that in the silhouette plot, the labels on the left-hand side of the
+#' procedure or by the user.
+#'
+#' Note that in the silhouette plot, the labels on the left-hand side of the
 #' chart show the units' names and the cluster number to which each unit is closer.\cr
 #'
 #' The silhouette plot is obtained from the \code{silhouette()} function out from the \code{cluster} package.
@@ -82,20 +93,22 @@
 #' of the heatmap if \code{order.map} is set to \code{TRUE}; for other methods see \code{\link[stats]{hclust}}.
 #' @param sort.map TRUE or FALSE (default) if the user does or does not want the rendered heatmap to be ordered on the basis of
 #' the selected hierachical clustering.
+#' @param number.cex Numeric. Set the size of the labels used for the coefficients displayed in the rendered heatmap.
+#' @param cex.dndr.lab Numeric. Set the size of the labels used in the dendrogram.
+#' @param cex.sil.lab Numeric. Set the size of the labels used in the silhouette plot.
+#' @param cex.dot.plt.lab Numeric. Set the size of the labels used in the Cleveland's dotplots representing by-cluster proportions.
 #' @param oneplot TRUE (default) or FALSE if the user wants or does not want the plots to be visualized in a single window.
-#' @param cex.dndr.lab Set the size of the labels used in the dendrogram.
-#' @param cex.sil.lab Set the size of the labels used in the silhouette plot.
-#' @param cex.dot.plt.lab Set the size of the labels used in the Cleveland's dotplots representing by-cluster proportions.
 #'
-#'@return The function returns a list storing the following components \itemize{
-##'  \item{BR.similarity.matrix: }{similarity matrix reporting the BR coefficients}
-##'  \item{P-value.matrix: }{matrix reporting the permuted p-values}
-##'  \item{classified.P-values.matrix: }{matrix reporting the permuted p-value classified as <0.05, <0.01, <0.001, or not significant}
-##'  \item{BR.distance_matrix: }{distance matrix on which the hierarchical clustering is performed (returned if clustering is selected)}
-##'  \item{avr.silh.width.by.n.of.clusters: }{average silhouette width by number of clusters (returned if clustering is selected)}
-##'  \item{partition.silh.data: }{silhouette data for the selected partition (returned if clustering is selected)}
-##'  \item{data.with.cluster.membership: }{copy of the input data table with an additional column storing the cluster membership for each row (returned if clustering is selected)}
-##'  \item{by.cluster.proportion: }{table reporting the proportion of column categories across each cluster; rows sum to 100 percent (returned if clustering is selected)}
+#'@return The function returns a list storing the following components
+#'\itemize{
+##'  \item \code{BR.similarity.matrix:} similarity matrix reporting the BR coefficients.
+##'  \item \code{P-value.matrix:} matrix reporting the permuted p-values.
+##'  \item \code{classified.P-values.matrix:} matrix reporting the permuted p-value classified as <0.05, <0.01, <0.001, or not significant.
+##'  \item \code{BR.distance_matrix:} distance matrix on which the hierarchical clustering is performed (returned if clustering is selected).
+##'  \item \code{avr.silh.width.by.n.of.clusters:} average silhouette width by number of clusters (returned if clustering is selected).
+##'  \item \code{partition.silh.data:} silhouette data for the selected partition (returned if clustering is selected).
+##'  \item \code{data.with.cluster.membership:} copy of the input data table with an additional column storing the cluster membership for each row (returned if clustering is selected).
+##'  \item \code{by.cluster.proportion:} table reporting the proportion of column categories across each cluster; rows sum to 100 percent (returned if clustering is selected).
 ##' }
 #'
 #' @keywords similarity
@@ -149,7 +162,7 @@
 #' @seealso \code{\link[corrplot]{corrplot}} , \code{\link[cluster]{silhouette}}
 #'
 #'
-brsim <- function(df, num.perm=1000, clust=FALSE, part=NULL, aggl.meth="ward.D2", sort.map=FALSE, oneplot=TRUE, cex.dndr.lab = 0.70, cex.sil.lab = 0.70, cex.dot.plt.lab = 0.75){
+brsim <- function(df, num.perm=1000, clust=FALSE, part=NULL, aggl.meth="ward.D2", sort.map=FALSE, number.cex = 0.70, cex.dndr.lab = 0.70, cex.sil.lab = 0.70, cex.dot.plt.lab = 0.70, oneplot=TRUE){
   # Save current par settings
   oldpar <- par(no.readonly = TRUE)
   # Ensure settings are restored when function exits
@@ -304,8 +317,8 @@ brsim <- function(df, num.perm=1000, clust=FALSE, part=NULL, aggl.meth="ward.D2"
       corrplot::corrplot(br_matrix,
                          method="square",
                          addCoef.col="red",
+                         number.cex = number.cex,
                          is.corr=FALSE,
-                         col.lim = c(0, 200),
                          col = col1(100),
                          tl.col="black",
                          tl.cex=0.8,
@@ -317,8 +330,8 @@ brsim <- function(df, num.perm=1000, clust=FALSE, part=NULL, aggl.meth="ward.D2"
       corrplot::corrplot(br_matrix,
                          method="square",
                          addCoef.col="red",
+                         number.cex = number.cex,
                          is.corr=FALSE,
-                         col.lim = c(0, 200),
                          col = col1(100),
                          tl.col="black",
                          tl.cex=0.8)
@@ -392,14 +405,18 @@ brsim <- function(df, num.perm=1000, clust=FALSE, part=NULL, aggl.meth="ward.D2"
                        cex=cex.dot.plt.lab,
                        pch=20)
 
+    # Rename the columns of the sil.res dataframe to give
+    # more meaningful labels before returning it
+    colnames(sil.res)[1] <- "cluster solution"
+    colnames(sil.res)[2] <- "average silhouette width"
   }
 
   if(clust==FALSE) {
     corrplot::corrplot(br_matrix,
                        method="square",
                        addCoef.col="red",
+                       number.cex = number.cex,
                        is.corr=FALSE,
-                       col.lim = c(0, 200),
                        col = col1(100),
                        tl.col="black",
                        tl.cex=0.8)
@@ -409,11 +426,6 @@ brsim <- function(df, num.perm=1000, clust=FALSE, part=NULL, aggl.meth="ward.D2"
     prop.by.clust <- NULL
     data.w.cluster.membership <- NULL
   }
-
-  # Rename the columns of the sil.res dataframe to give
-  # more meaningful labels before returning it
-  colnames(sil.res)[1] <- "cluster solution"
-  colnames(sil.res)[2] <- "average silhouette width"
 
   return (list("BR.similarity.matrix"=br_matrix,
                "P-value.matrix"=p_matrix,
